@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,12 +33,14 @@ public class EjecutivoController {
     @Autowired
     private EjecutivoService ejecutivoService;
 
+    @PreAuthorize("hasRole('GERENTE')")
     @GetMapping("/all")
     public ResponseEntity<List<Ejecutivo>> getAll() {
         List<Ejecutivo> ejecutivos = ejecutivoService.findAll();
         return ResponseEntity.ok(ejecutivos);
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @GetMapping("{id}")
     public ResponseEntity<Ejecutivo> getById(@PathVariable Long id) {
         Optional<Ejecutivo> ejecutivo = ejecutivoService.findById(id);
@@ -45,6 +48,7 @@ public class EjecutivoController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody Ejecutivo ejecutivo, BindingResult result) {
         if (result.hasErrors()) {
@@ -54,6 +58,7 @@ public class EjecutivoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ejecutivoSave);
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody Ejecutivo ejecutivo,
             BindingResult result) {
@@ -68,6 +73,7 @@ public class EjecutivoController {
         }
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> partialUpdate(@PathVariable Long id,
             @RequestBody Map<String, Object> updates, BindingResult result) {
@@ -92,6 +98,7 @@ public class EjecutivoController {
         }
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @DeleteMapping("/delete({id})")
     public ResponseEntity<Ejecutivo> delete(@PathVariable Long id) {
         Optional<Ejecutivo> ejecutivo = ejecutivoService.delete(id);

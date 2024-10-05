@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -26,12 +27,14 @@ public class GerenteController {
     @Autowired
     private GerenteService gerenteService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<List<Gerente>> getAll() {
         List<Gerente> gerentes = gerenteService.findAll();
         return ResponseEntity.ok(gerentes);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Gerente> getById(@PathVariable Long id) {
         Optional<Gerente> gerente = gerenteService.findById(id);
@@ -39,6 +42,7 @@ public class GerenteController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody Gerente gerente, BindingResult result) {
         if (result.hasErrors()) {
@@ -56,6 +60,7 @@ public class GerenteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(gerenteSave);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody Gerente gerente,
             BindingResult result) {
@@ -70,6 +75,7 @@ public class GerenteController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> partialUpdate(@PathVariable Long id, @RequestBody Map<String, Object> updates,
             BindingResult result) {
@@ -94,6 +100,7 @@ public class GerenteController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Gerente> delete(@PathVariable Long id) {
         Optional<Gerente> gerente = gerenteService.delete(id);

@@ -5,14 +5,18 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Gerente;
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Sucursal;
+import com.ulsa.oaxaca.edu.proyecto_banco.entities.User;
 import com.ulsa.oaxaca.edu.proyecto_banco.repositories.GerenteRepository;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.RoleRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.repositories.SucursalRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.GerenteService;
+import com.ulsa.oaxaca.edu.proyecto_banco.service.UserService;
 
 @Service
 public class GerenteServiceImpl implements GerenteService {
@@ -23,6 +27,15 @@ public class GerenteServiceImpl implements GerenteService {
     @Autowired
     private SucursalRepository sucursalRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private UserService userService;
+
     @Transactional
     @Override
     public Gerente save(Gerente gerente) {
@@ -30,7 +43,19 @@ public class GerenteServiceImpl implements GerenteService {
             Optional<Sucursal> sucursalOptional = sucursalRepository.findById(gerente.getSucursal().getId());
             sucursalOptional.ifPresent(gerente::setSucursal);
         }
-        return gerenteRepository.save(gerente);
+
+        Gerente gerenteDb = gerenteRepository.save(gerente);
+
+        User user = User.builder()
+                .username(gerente.getRfc())
+                .password(passwordEncoder.encode(gerente.getPassword()))
+                .role(roleRepository.findByName("ROLE_GERENTE").orElseThrow())
+                .persona(gerenteDb)
+                .build();
+
+        userService.save(user);
+
+        return gerenteDb;
     }
 
     @Transactional(readOnly = true)

@@ -1,11 +1,15 @@
 package com.ulsa.oaxaca.edu.proyecto_banco.serviceImpl;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Cajero;
+import com.ulsa.oaxaca.edu.proyecto_banco.entities.User;
 import com.ulsa.oaxaca.edu.proyecto_banco.repositories.CajeroRepository;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.RoleRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.CajeroSerice;
+import com.ulsa.oaxaca.edu.proyecto_banco.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +22,30 @@ public class CajeroServiceImpl implements CajeroSerice {
     @Autowired
     private CajeroRepository cajeroRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private UserService userService;
+
     @Transactional
     @Override
     public Cajero save(Cajero cajero) {
-        return cajeroRepository.save(cajero);
+        Cajero cajeroDb = cajeroRepository.save(cajero);
+
+        User user = User.builder()
+                .username(cajero.getRfc())
+                .password(passwordEncoder.encode(cajero.getPassword()))
+                .role(roleRepository.findByName("ROLE_CAJERO").orElseThrow())
+                .persona(cajeroDb)
+                .build();
+
+        userService.save(user);
+
+        return cajeroDb;
     }
 
     @Transactional(readOnly = true)
