@@ -2,6 +2,7 @@ package com.ulsa.oaxaca.edu.proyecto_banco.controller;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Cajero;
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Sucursal;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.BanamexOaxacaRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.repositories.SucursalRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.CajeroSerice;
 import com.ulsa.oaxaca.edu.proyecto_banco.validation.EndpointsValidation;
@@ -30,6 +31,9 @@ public class CajeroController {
 
     @Autowired
     private SucursalRepository sucursalRepository;
+
+    @Autowired
+    private BanamexOaxacaRepository banamexOaxacaRepository;
 
     @PreAuthorize("hasRole('GERENTE')")
     @GetMapping("/all")
@@ -64,6 +68,7 @@ public class CajeroController {
         }
 
         Cajero cajeroSave = cajeroSerice.save(cajero);
+        banamexOaxacaRepository.incrementNumeroEmpleados(1L);
         return ResponseEntity.status(HttpStatus.CREATED).body(cajeroSave);
     }
 

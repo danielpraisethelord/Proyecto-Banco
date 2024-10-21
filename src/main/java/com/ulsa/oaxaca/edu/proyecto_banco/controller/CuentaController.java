@@ -48,14 +48,14 @@ public class CuentaController {
     @Autowired
     private TarjetaService tarjetaService;
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @GetMapping("/all")
     public ResponseEntity<?> getAll() {
         List<Cuenta> cuentas = cuentaService.findAll();
         return ResponseEntity.ok(cuentas);
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO', 'CLIENTE')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id, Authentication authentication) {
         String currentUsername = authentication.getName();
@@ -89,7 +89,7 @@ public class CuentaController {
     // return ResponseEntity.status(HttpStatus.CREATED).body(cuentaSave);
     // }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody Cuenta cuenta, BindingResult result) {
         if (result.hasErrors()) {
@@ -103,7 +103,7 @@ public class CuentaController {
         }
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> partialUpdate(@PathVariable Long id, @RequestBody Map<String, Object> updates,
             BindingResult result) {
@@ -127,7 +127,7 @@ public class CuentaController {
         }
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         Optional<Cuenta> cuentaOptional = cuentaService.delete(id);

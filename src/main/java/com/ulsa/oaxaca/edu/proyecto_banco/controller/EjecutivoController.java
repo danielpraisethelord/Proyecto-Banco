@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Ejecutivo;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.BanamexOaxacaRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.EjecutivoService;
 import com.ulsa.oaxaca.edu.proyecto_banco.validation.EndpointsValidation;
 
@@ -32,6 +33,9 @@ public class EjecutivoController {
 
     @Autowired
     private EjecutivoService ejecutivoService;
+
+    @Autowired
+    private BanamexOaxacaRepository banamexOaxacaRepository;
 
     @PreAuthorize("hasRole('GERENTE')")
     @GetMapping("/all")
@@ -55,6 +59,7 @@ public class EjecutivoController {
             return EndpointsValidation.validation(result);
         }
         Ejecutivo ejecutivoSave = ejecutivoService.save(ejecutivo);
+        banamexOaxacaRepository.incrementNumeroEmpleados(1L);
         return ResponseEntity.status(HttpStatus.CREATED).body(ejecutivoSave);
     }
 

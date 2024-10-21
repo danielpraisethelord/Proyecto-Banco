@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
 
+import com.ulsa.oaxaca.edu.proyecto_banco.entities.BanamexOaxaca;
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Sucursal;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.BanamexOaxacaRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.SucursalService;
 import com.ulsa.oaxaca.edu.proyecto_banco.validation.EndpointsValidation;
 
@@ -33,12 +35,20 @@ public class SucursalController {
     @Autowired
     private SucursalService sucursalService;
 
+    @Autowired
+    private BanamexOaxacaRepository banamexOaxacaRepository;
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody Sucursal sucursal, BindingResult result) {
         if (result.hasErrors()) {
             return EndpointsValidation.validation(result);
         }
+
+        banamexOaxacaRepository.incrementNumeroSucursales(1L);
+        Optional<BanamexOaxaca> optionalBanamexOaxaca = banamexOaxacaRepository.findById(1L);
+        BanamexOaxaca banamexOaxaca = optionalBanamexOaxaca.get();
+        sucursal.setBanco(banamexOaxaca);
         Sucursal sucursalSave = sucursalService.save(sucursal);
         if (sucursalSave.getId() != null) {
             return ResponseEntity.status(HttpStatus.CREATED).body(sucursalSave);

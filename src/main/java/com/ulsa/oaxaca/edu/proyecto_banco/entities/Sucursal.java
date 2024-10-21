@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "sucursal")
 @Data
@@ -47,6 +49,7 @@ public class Sucursal {
 
     @ManyToOne
     @JoinColumn(name = "banco_id")
+    @JsonIgnoreProperties({ "listaSucursales" })
     private BanamexOaxaca banco;
 
     @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

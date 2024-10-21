@@ -1,6 +1,7 @@
 package com.ulsa.oaxaca.edu.proyecto_banco.controller;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Gerente;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.BanamexOaxacaRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.GerenteService;
 import com.ulsa.oaxaca.edu.proyecto_banco.validation.EndpointsValidation;
 
@@ -26,6 +27,9 @@ public class GerenteController {
 
     @Autowired
     private GerenteService gerenteService;
+
+    @Autowired
+    private BanamexOaxacaRepository banamexOaxacaRepository;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
@@ -56,6 +60,7 @@ public class GerenteController {
                     Collections.singletonMap("mensaje", "Ya existe un gerente para esta sucursal"),
                     HttpStatus.BAD_REQUEST);
         }
+        banamexOaxacaRepository.incrementNumeroEmpleados(1L);
         Gerente gerenteSave = gerenteService.save(gerente);
         return ResponseEntity.status(HttpStatus.CREATED).body(gerenteSave);
     }

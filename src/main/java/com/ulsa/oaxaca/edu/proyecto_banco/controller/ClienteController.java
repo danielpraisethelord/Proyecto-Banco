@@ -2,6 +2,7 @@ package com.ulsa.oaxaca.edu.proyecto_banco.controller;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.dto.ClienteDto;
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Cliente;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.BanamexOaxacaRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.ClienteService;
 import com.ulsa.oaxaca.edu.proyecto_banco.utils.ClienteMapper;
 import com.ulsa.oaxaca.edu.proyecto_banco.validation.EndpointsValidation;
@@ -30,7 +31,10 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @Autowired
+    private BanamexOaxacaRepository banamexOaxacaRepository;
+
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @GetMapping("/all")
     public ResponseEntity<?> getAll() {
         List<Cliente> clientes = clienteService.findAll();
@@ -40,7 +44,7 @@ public class ClienteController {
         return ResponseEntity.ok(clientesDto);
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id, Authentication authentication) {
         String currentUsername = authentication.getName();
@@ -58,18 +62,19 @@ public class ClienteController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody Cliente cliente, BindingResult result) {
         if (result.hasErrors()) {
             return EndpointsValidation.validation(result);
         }
+        banamexOaxacaRepository.incrementTotalClientes(1L);
         Cliente clienteSave = clienteService.save(cliente);
         ClienteDto clienteDto = ClienteMapper.toDto(clienteSave);
         return ResponseEntity.status(HttpStatus.CREATED).body(clienteDto);
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody Cliente cliente,
             BindingResult result) {
@@ -85,7 +90,7 @@ public class ClienteController {
         }
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> partialUpdate(@PathVariable Long id, @RequestBody Map<String, Object> updates,
             BindingResult result) {
@@ -111,7 +116,7 @@ public class ClienteController {
         }
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         Optional<Cliente> cliente = clienteService.delete(id);
