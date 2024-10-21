@@ -5,12 +5,16 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Ejecutivo;
+import com.ulsa.oaxaca.edu.proyecto_banco.entities.User;
 import com.ulsa.oaxaca.edu.proyecto_banco.repositories.EjecutivoRepository;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.RoleRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.EjecutivoService;
+import com.ulsa.oaxaca.edu.proyecto_banco.service.UserService;
 
 @Service
 public class EjecutivoServiceImpl implements EjecutivoService {
@@ -18,10 +22,30 @@ public class EjecutivoServiceImpl implements EjecutivoService {
     @Autowired
     private EjecutivoRepository ejecutivoRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private UserService userService;
+
     @Transactional
     @Override
     public Ejecutivo save(Ejecutivo ejecutivo) {
-        return ejecutivoRepository.save(ejecutivo);
+        Ejecutivo ejecutivoDb = ejecutivoRepository.save(ejecutivo);
+
+        User user = User.builder()
+                .username(ejecutivo.getRfc())
+                .password(passwordEncoder.encode(ejecutivo.getPassword()))
+                .role(roleRepository.findByName("ROLE_EJECUTIVO").orElseThrow())
+                .persona(ejecutivoDb)
+                .build();
+
+        userService.save(user);
+
+        return ejecutivoDb;
     }
 
     @Transactional(readOnly = true)

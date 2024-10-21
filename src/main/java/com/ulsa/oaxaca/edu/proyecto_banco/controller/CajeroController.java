@@ -2,6 +2,7 @@ package com.ulsa.oaxaca.edu.proyecto_banco.controller;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Cajero;
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Sucursal;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.BanamexOaxacaRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.repositories.SucursalRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.CajeroSerice;
 import com.ulsa.oaxaca.edu.proyecto_banco.validation.EndpointsValidation;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +32,17 @@ public class CajeroController {
     @Autowired
     private SucursalRepository sucursalRepository;
 
+    @Autowired
+    private BanamexOaxacaRepository banamexOaxacaRepository;
+
+    @PreAuthorize("hasRole('GERENTE')")
     @GetMapping("/all")
     public ResponseEntity<?> getAll() {
         List<Cajero> cajeros = cajeroSerice.findAll();
         return ResponseEntity.ok(cajeros);
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         Optional<Cajero> cajeroOptional = cajeroSerice.findById(id);
@@ -43,6 +50,7 @@ public class CajeroController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody Cajero cajero, BindingResult result) {
         if (result.hasErrors()) {
@@ -60,9 +68,11 @@ public class CajeroController {
         }
 
         Cajero cajeroSave = cajeroSerice.save(cajero);
+        banamexOaxacaRepository.incrementNumeroEmpleados(1L);
         return ResponseEntity.status(HttpStatus.CREATED).body(cajeroSave);
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody Cajero cajero, BindingResult result) {
         if (result.hasErrors()) {
@@ -76,6 +86,7 @@ public class CajeroController {
         }
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> partialUpdate(@PathVariable Long id, @RequestBody Map<String, Object> updates,
             BindingResult result) {
@@ -100,6 +111,7 @@ public class CajeroController {
         }
     }
 
+    @PreAuthorize("hasRole('GERENTE')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         Optional<Cajero> cajero = cajeroSerice.delete(id);

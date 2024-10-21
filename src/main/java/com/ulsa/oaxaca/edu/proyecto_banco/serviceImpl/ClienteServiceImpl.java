@@ -4,17 +4,22 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Cliente;
 import com.ulsa.oaxaca.edu.proyecto_banco.entities.Cuenta;
+import com.ulsa.oaxaca.edu.proyecto_banco.entities.User;
 import com.ulsa.oaxaca.edu.proyecto_banco.repositories.ClienteRepository;
+import com.ulsa.oaxaca.edu.proyecto_banco.repositories.RoleRepository;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.ClienteService;
 import com.ulsa.oaxaca.edu.proyecto_banco.service.CuentaService;
+import com.ulsa.oaxaca.edu.proyecto_banco.service.UserService;
 
 @Service
 public class ClienteServiceImpl implements ClienteService {
@@ -24,6 +29,15 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Autowired
     private CuentaService cuentaService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Transactional
     @Override
@@ -41,7 +55,18 @@ public class ClienteServiceImpl implements ClienteService {
         cliente.setCuentas(new ArrayList<>());
         cliente.getCuentas().add(cuenta);
 
-        return clienteRepository.save(cliente);
+        Cliente clienteDb = clienteRepository.save(cliente);
+
+        User user = User.builder()
+                .username(clienteDb.getRfc())
+                .password(passwordEncoder.encode(cliente.getPassword()))
+                .role(roleRepository.findByName("ROLE_CLIENTE").orElseThrow())
+                .persona(clienteDb)
+                .build();
+
+        userService.save(user);
+
+        return clienteDb;
     }
 
     @Transactional(readOnly = true)
@@ -93,6 +118,11 @@ public class ClienteServiceImpl implements ClienteService {
         Optional<Cliente> clienteOptional = clienteRepository.findById(id);
         clienteOptional.ifPresent(clienteRepository::delete);
         return clienteOptional;
+    }
+
+    @Override
+    public Optional<Cliente> findByRfc(String rfc) {
+        return clienteRepository.findByRfc(rfc);
     }
 
 }

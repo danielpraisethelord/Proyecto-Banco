@@ -12,6 +12,8 @@ public interface ClienteService {
 
     Optional<Cliente> findById(Long id);
 
+    Optional<Cliente> findByRfc(String rfc);
+
     Optional<Cliente> update(Long id, Cliente cliente);
 
     Optional<Cliente> delete(Long id);
