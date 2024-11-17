@@ -2,6 +2,8 @@ package com.ulsa.oaxaca.edu.proyecto_banco.serviceImpl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
@@ -65,5 +67,21 @@ public class SucursalServiceImpl implements SucursalService {
         Optional<Sucursal> sucursal = sucursalRepository.findById(id);
         sucursal.ifPresent(sucursalRepository::delete);
         return sucursal;
+    }
+
+    @Override
+    public Map<Object, String> findSucursalesSinGerente() {
+        List<Sucursal> sucursales = sucursalRepository.findSucursalesSinGerente();
+        Map<Object, String> sucursalesMap = sucursales.stream()
+                .collect(Collectors.toMap(Sucursal::getId, Sucursal::getNombre));
+        return sucursalesMap;
+    }
+
+    @Override
+    public Map<Object, String> findAllNameId() {
+        List<Sucursal> sucursales = (List<Sucursal>) sucursalRepository.findAll();
+        Map<Object, String> sucursalesMap = sucursales.stream()
+                .collect(Collectors.toMap(Sucursal::getId, Sucursal::getNombre));
+        return sucursalesMap;
     }
 }

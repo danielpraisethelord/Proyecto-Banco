@@ -7,5 +7,4 @@ import com.ulsa.oaxaca.edu.proyecto_banco.entities.Persona;
 
 @Repository
 public interface PersonaRepository extends CrudRepository<Persona, Long> {
-
 }

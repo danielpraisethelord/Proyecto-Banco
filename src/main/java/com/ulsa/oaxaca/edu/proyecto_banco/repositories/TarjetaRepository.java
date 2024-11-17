@@ -1,5 +1,7 @@
 package com.ulsa.oaxaca.edu.proyecto_banco.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -20,4 +22,8 @@ public interface TarjetaRepository extends CrudRepository<Tarjeta, Long> {
     @Modifying
     @Query("UPDATE Tarjeta t SET t.saldoActual = t.saldoActual - :monto, t.limiteCredito = t.limiteCredito + :monto WHERE t.id = :id AND t.saldoActual >= :monto")
     int pagarTarjeta(@Param("id") Long id, @Param("monto") Double monto);
+
+    boolean existsByNumeroTarjeta(String numeroTarjeta);
+
+    List<Tarjeta> findByCuentaClienteId(Long clienteId);
 }

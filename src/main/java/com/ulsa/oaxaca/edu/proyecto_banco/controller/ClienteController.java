@@ -57,7 +57,17 @@ public class ClienteController {
             }
         }
 
-        Optional<Cliente> cliente = clienteService.findById(id);
+        // Optional<Cliente> cliente = clienteService.findById(id);
+        // return cliente.map(value -> ResponseEntity.ok(ClienteMapper.toDto(value)))
+        // .orElseGet(() -> ResponseEntity.notFound().build());
+
+        return ResponseEntity.ok().body(clienteService.findById(id).orElseThrow());
+    }
+
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO', 'CLIENTE')")
+    @GetMapping("/rfc/{rfc}")
+    public ResponseEntity<?> getByRfc(@PathVariable String rfc) {
+        Optional<Cliente> cliente = clienteService.findByRfc(rfc);
         return cliente.map(value -> ResponseEntity.ok(ClienteMapper.toDto(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

@@ -14,6 +14,24 @@ import java.util.stream.Collectors;
 public class ClienteMapper {
 
         public static ClienteDto toDto(Cliente cliente) {
+                if (cliente.getCuentas() == null) {
+                        return new ClienteDto(
+                                        cliente.getId(),
+                                        cliente.getNombre(),
+                                        cliente.getApellidoPaterno(),
+                                        cliente.getApellidoMaterno(),
+                                        cliente.getGenero(),
+                                        cliente.getFechaNacimiento(),
+                                        cliente.getRfc(),
+                                        cliente.getEmail(),
+                                        cliente.getTelefono(),
+                                        cliente.getNivelDeEstudios(),
+                                        cliente.getFechaRegistro(),
+                                        cliente.getEstado(),
+                                        cliente.getSucursal().getId(),
+                                        Collections.emptyList());
+                }
+
                 List<CuentaDto> cuentasDto = cliente.getCuentas().stream()
                                 .map(ClienteMapper::toCuentaDto)
                                 .collect(Collectors.toList());
@@ -23,8 +41,12 @@ public class ClienteMapper {
                                 cliente.getNombre(),
                                 cliente.getApellidoPaterno(),
                                 cliente.getApellidoMaterno(),
+                                cliente.getGenero(),
+                                cliente.getFechaNacimiento(),
                                 cliente.getRfc(),
                                 cliente.getEmail(),
+                                cliente.getTelefono(),
+                                cliente.getNivelDeEstudios(),
                                 cliente.getFechaRegistro(),
                                 cliente.getEstado(),
                                 cliente.getSucursal().getId(),

@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,6 +32,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/tarjeta")
+@Validated
 public class TarjetaController {
 
     @Autowired
@@ -42,14 +44,14 @@ public class TarjetaController {
     @Autowired
     private ClienteService clienteService;
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @GetMapping("/all")
     public ResponseEntity<?> getAll() {
         List<Tarjeta> tarjetas = tarjetaService.findAll();
         return ResponseEntity.ok(tarjetas);
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         Optional<Tarjeta> tarjetaOptional = tarjetaService.findById(id);
@@ -57,7 +59,7 @@ public class TarjetaController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @PostMapping("/create")
     public ResponseEntity<?> create(@Valid @RequestBody Tarjeta tarjeta, BindingResult result) {
         if (result.hasErrors()) {
@@ -74,7 +76,7 @@ public class TarjetaController {
         }
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody Tarjeta tarjeta, BindingResult result) {
         if (result.hasErrors()) {
             return EndpointsValidation.validation(result);
@@ -87,7 +89,7 @@ public class TarjetaController {
         }
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> partialUpdate(@PathVariable Long id, @PathVariable Map<String, Object> updates,
             BindingResult result) {
@@ -111,7 +113,7 @@ public class TarjetaController {
         }
     }
 
-    @PreAuthorize("hasRole('GERENTE', 'EJECUTIVO')")
+    @PreAuthorize("hasAnyRole('GERENTE', 'EJECUTIVO')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         Optional<Tarjeta> tarjetaOptional = tarjetaService.delete(id);
@@ -123,9 +125,11 @@ public class TarjetaController {
 
     @PreAuthorize("hasRole('CLIENTE')")
     @PostMapping("/simulatePurchase/{id}")
-    public ResponseEntity<?> simulatePurchase(@PathVariable Long id, @RequestBody Map<String, Object> purchaseDetails,
+    public ResponseEntity<?> simulatePurchase(@PathVariable Long id,
+            @RequestBody @Valid Map<String, Object> purchaseDetails,
             Authentication authentication) {
         String currentUsername = authentication.getName();
+        System.out.println("Current Username: " + currentUsername);
 
         Optional<Tarjeta> tarjetaOptional = tarjetaService.findById(id);
         if (!tarjetaOptional.isPresent()) {
@@ -142,9 +146,20 @@ public class TarjetaController {
 
         Cuenta cuenta = cuentaOptional.get();
         Long idCliente = cuenta.getCliente().getId();
+        System.out.println("ID Cliente: " + idCliente);
+
         Optional<Cliente> clienteOptional = clienteService.findById(idCliente);
 
-        if (!clienteOptional.isPresent() || !clienteOptional.get().getRfc().equals(currentUsername)) {
+        if (!clienteOptional.isPresent()) {
+            System.out.println("Cliente no encontrado.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("No tienes permiso para realizar esta operación.");
+        }
+
+        Cliente cliente = clienteOptional.get();
+        System.out.println("Cliente RFC: " + cliente.getRfc());
+
+        if (!cliente.getRfc().equals(currentUsername)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("No tienes permiso para realizar esta operación.");
         }
@@ -163,5 +178,21 @@ public class TarjetaController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient balance.");
         }
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/tarjetasByUsuario")
+    public ResponseEntity<?> getTarjetasByUsuario(Authentication authentication) {
+        String currentUsername = authentication.getName();
+        Optional<Cliente> clienteOptional = clienteService.findByRfc(currentUsername);
+
+        if (!clienteOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuario no encontrado.");
+        }
+
+        Cliente cliente = clienteOptional.get();
+        List<Tarjeta> tarjetas = tarjetaService.findByClienteId(cliente.getId());
+
+        return ResponseEntity.ok(tarjetas);
     }
 }

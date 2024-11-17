@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ulsa.oaxaca.edu.proyecto_banco.validation.UniqueNumeroTarjeta;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -56,6 +57,7 @@ public class Tarjeta {
     @NotBlank(message = "El campo número de tarjeta no puede estar vacío")
     @Pattern(regexp = "\\d{16}", message = "El número de tarjeta debe tener 16 dígitos")
     @Column(name = "numero_tarjeta")
+    @UniqueNumeroTarjeta(message = "El número de tarjeta ya existe")
     private String numeroTarjeta;
 
     @NotNull(message = "El campo límite de crédito no puede estar vacío")

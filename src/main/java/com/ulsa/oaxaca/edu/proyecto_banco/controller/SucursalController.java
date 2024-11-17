@@ -63,6 +63,12 @@ public class SucursalController {
         return ResponseEntity.ok(sucursalService.findAll());
     }
 
+    @PreAuthorize("hasAnyRole('EJECUTIVO', 'GERENTE')")
+    @GetMapping("/all-name-id")
+    public ResponseEntity<?> getAllNameId() {
+        return ResponseEntity.ok(sucursalService.findAllNameId());
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
@@ -72,6 +78,12 @@ public class SucursalController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/sin-gerente")
+    public ResponseEntity<?> getSucursalesSinGerente() {
+        return ResponseEntity.ok(sucursalService.findSucursalesSinGerente());
     }
 
     @PreAuthorize("hasRole('ADMIN')")

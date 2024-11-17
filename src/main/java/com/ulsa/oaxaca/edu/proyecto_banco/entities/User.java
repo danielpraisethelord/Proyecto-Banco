@@ -2,6 +2,7 @@ package com.ulsa.oaxaca.edu.proyecto_banco.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,7 +39,7 @@ public class User {
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @MapsId
     @JoinColumn(name = "id")
     private Persona persona;

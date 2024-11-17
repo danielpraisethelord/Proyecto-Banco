@@ -104,7 +104,7 @@ public class EjecutivoController {
     }
 
     @PreAuthorize("hasRole('GERENTE')")
-    @DeleteMapping("/delete({id})")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Ejecutivo> delete(@PathVariable Long id) {
         Optional<Ejecutivo> ejecutivo = ejecutivoService.delete(id);
         if (ejecutivo.isPresent()) {

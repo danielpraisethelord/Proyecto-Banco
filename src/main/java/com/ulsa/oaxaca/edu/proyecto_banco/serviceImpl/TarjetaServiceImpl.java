@@ -63,4 +63,14 @@ public class TarjetaServiceImpl implements TarjetaService {
             return tarjeta;
         });
     }
+
+    public List<Tarjeta> findByClienteId(Long clienteId) {
+        return tarjetaRepository.findByCuentaClienteId(clienteId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Boolean existsByNumeroTarjeta(String numeroTarjeta) {
+        return tarjetaRepository.existsByNumeroTarjeta(numeroTarjeta);
+    }
 }
