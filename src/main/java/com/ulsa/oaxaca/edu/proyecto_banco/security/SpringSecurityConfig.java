@@ -63,7 +63,7 @@ public class SpringSecurityConfig {
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowCredentials(true);
                 config.addAllowedOrigin("http://localhost:5173");
-                config.addAllowedOrigin("https://banco-app-ulsa.netlify.app:5173");
+                config.addAllowedOrigin("https://banco-app-ulsa.netlify.app");
                 config.addAllowedHeader("*");
                 config.addAllowedMethod("*");
 
